@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+/*
+  ROS - like format
+*/
+message Image {
+    uint32 width = 1;
+    uint32 height = 2;
+    string encoding = 4; // "bgr8", "rgb8", "gray8"
+    bytes data = 5;  // the actual image data, in bytes
+}
+
+message Point2d {
+    int32 x = 1;
+    int32 y = 2;
+}
+
+message Rect {
+    Point2d tl = 1;
+    Point2d br = 2;
+}
+
+message Detection {
+    float confidence = 1;
+    uint32 label_id = 2;
+    string label = 3; //optional
+    Rect box = 4;
+}
+
+message Detections {
+    repeated Detection detections = 1;
+}
+
+service DetectionService {
+    rpc ObjectDetection (Image) returns (Detections) {} //single image detection
+}
+
+
+

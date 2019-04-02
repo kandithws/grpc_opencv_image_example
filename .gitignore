@@ -1,0 +1,5 @@
+*.swp
+.idea
+cmake-build-debug
+venv
+build
