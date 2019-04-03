@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 # DIRTY WRITE for now
 from distutils.version import StrictVersion
+from detector.idetector import IDetector
+from detection_proto.detection_pb2 import Detections, Detection, Rect, Point2d
 
 
 class CVDetector:
@@ -23,11 +25,11 @@ class CVDetector:
         # Get the names of the output layers, i.e. the layers with unconnected outputs
         return [layersNames[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
-    def detect(self, image, draw_boxes=False, apply_nms=True):
+    def detect(self, image, draw_boxes=False, apply_nms=True, swapRB=True):
         # convert RGB to BGR
         # cv_image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         # blob = cv2.dnn.blobFromImage(cv_image, 1./255, (self.im_width, self.im_height), [0,0,0], swapRB=1, crop=False)
-        blob = cv2.dnn.blobFromImage(image, 1. / 255, (self.im_width, self.im_height), [0, 0, 0], swapRB=0, crop=False)
+        blob = cv2.dnn.blobFromImage(image, 1. / 255, (self.im_width, self.im_height), [0, 0, 0], swapRB=swapRB, crop=False)
         self.net.setInput(blob)
         if self.net_output_names is not None:
             outs = self.net.forward(self.net_output_names)
@@ -76,7 +78,7 @@ class CVDetector:
         return filtered_classIds, filtered_confidences, filtered_boxes
 
 
-class DarknetCVDetector(CVDetector):
+class DarknetCVDetector(CVDetector, IDetector):
     def __init__(self, paths, config=None):
         if config is None:
             config = {}
@@ -96,6 +98,26 @@ class DarknetCVDetector(CVDetector):
         self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
         self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
         self.net_output_names = self.get_output_names(self.net)
+
+    def detect_object(self, image) -> Detections:
+        (classIds, confidences, boxes_rect) = self.detect(image, draw_boxes=True, swapRB=True)
+        detections = Detections()
+        ds = []
+        
+        for id, conf, box in zip(classIds, confidences, boxes_rect):
+            d = Detection()
+            d.confidence = conf
+            d.label_id = id
+            d.label = self.classes[id]
+            # Doing like this due to protobuf
+            d.box.tl.x = box[0]
+            d.box.tl.y = box[1]
+            d.box.br.x = box[0] + box[2]
+            d.box.br.y = box[1] + box[3]
+            ds.append(d)
+        detections.detections.extend(ds)
+        return detections
+
 
     # Remove the bounding boxes with low confidence using non-maxima suppression
     def post_process(self, frame, outs):

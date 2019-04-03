@@ -7,6 +7,7 @@
 #include <opencv2/opencv.hpp>
 #include "proto-src/detection.grpc.pb.h"
 
+
 class DetectionClient {
   public:
     DetectionClient(std::shared_ptr<grpc::Channel> channel)
@@ -17,7 +18,6 @@ class DetectionClient {
         auto req_img = toImageRequest(img);
         grpc::ClientContext context;
         auto st = stub_->ObjectDetection(&context, req_img, &response);
-        std::cout << "I AM HERE!" << std::endl;
 
         if (st.ok()){
 

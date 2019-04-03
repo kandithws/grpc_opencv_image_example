@@ -5,17 +5,23 @@ import cv2
 from detection_proto.cv_img_converter import to_cv2
 from concurrent import futures
 import time
+from detector.cv_detector import DarknetCVDetector
 
 
 class DetectionServicer(detection_proto.detection_pb2_grpc.DetectionServiceServicer):
+    def __init__(self):
+        self._detector = DarknetCVDetector({
+            'names': '/home/kandithws/ait_workspace/thesis_ml_ws/models/darknet-coco/coco.names',
+            'model_config': '/home/kandithws/ait_workspace/thesis_ml_ws/models/darknet-coco/yolov3.cfg',
+            'model_weight': '/home/kandithws/ait_workspace/thesis_ml_ws/models/darknet-coco/yolov3.weights'
+        })
 
     def ObjectDetection(self, image, context):
         # Non-streaming based
         # convert to CV2
         mat = to_cv2(image)
-        cv2.imwrite('test_out.jpeg', mat)
-        msg = detection_proto.detection_pb2.Detections()
-        msg.detections.extend([])
+        msg = self._detector.detect_object(mat)
+        cv2.imwrite('detection_out.jpeg', mat)
         return msg
 
 

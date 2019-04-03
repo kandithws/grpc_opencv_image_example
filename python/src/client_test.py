@@ -10,7 +10,8 @@ def main():
         stub = detection_proto.detection_pb2_grpc.DetectionServiceStub(channel)
         msg = from_cv2(cv2.imread(argv[1]))
         response = stub.ObjectDetection(msg)
-        print(type(response))
+        # print(len(response))
+        print(response)
     print("--------DONE----------")
 
 
