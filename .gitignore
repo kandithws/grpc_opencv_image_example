@@ -3,3 +3,8 @@
 cmake-build-debug
 venv
 build
+.vscode
+*.pyc
+*.png
+*.jpg
+*.jpeg

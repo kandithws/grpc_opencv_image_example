@@ -35,12 +35,9 @@ class DetectionClient {
         auto img_msg = Image();
         img_msg.set_encoding(encoding);
         size_t size = img.total() * img.elemSize();
-        char* bytes = new char[size];
-        std::memcpy(bytes, img.data, size * sizeof(char));
-        img_msg.set_data(bytes);
-        delete[] bytes;
-        img_msg.set_height(img.cols);
-        img_msg.set_width(img.rows);
+        img_msg.set_data(img.data, size * sizeof(char));
+        img_msg.set_width(img.cols);
+        img_msg.set_height(img.rows);
         return img_msg;
     };
 
