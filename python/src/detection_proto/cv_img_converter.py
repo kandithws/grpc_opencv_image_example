@@ -19,7 +19,6 @@ def to_cv2(msg):
     width = msg.width
     height = msg.height   
     np_data = np.frombuffer(msg.data, dtype=np.uint8)
-    print(np_data.shape)
     if msg.encoding == "bgr8" or msg.encoding == "rgb8":
         img = np_data.reshape((height, width, 3))
     else:

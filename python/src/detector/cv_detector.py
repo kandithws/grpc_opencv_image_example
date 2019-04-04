@@ -100,9 +100,7 @@ class DarknetCVDetector(CVDetector, IDetector):
         self.net_output_names = self.get_output_names(self.net)
 
     def detect_object(self, image) -> Detections:
-        print(" ABOUT TO DETECT")
         (classIds, confidences, boxes_rect) = self.detect(image, swapRB=True)
-        print("DETECTED")
         detections = Detections()
         ds = []
         
